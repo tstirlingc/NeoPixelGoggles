@@ -15,8 +15,9 @@ uint8_t  mode   = 0, // Current animation effect
 uint32_t color  = 0xFF0000; // Start red
 uint32_t prevTime;
 
-uint32_t red = pixels.Color(255,0,0);
-uint32_t green = pixels.Color(0,255,0);
+uint32_t red = pixels.Color(85,0,0);
+uint32_t green = pixels.Color(0,85,0);
+uint32_t blue = pixels.Color(0,0,85);
 
 void setup() {
 #ifdef __AVR_ATtiny85__ // Trinket, Gemma, etc.
@@ -89,19 +90,66 @@ void left_right_sync_CCW(){
 }
 
 void infinity(){
-  int sequence[32] = {};
+  int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
+  0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
   for (int i=0 ; i<32 ; ++i) { 
     all_off();
-    pixels.setPixelColor(i,red);
+    pixels.setPixelColor(sequence[i],red);
     pixels.show();
-    delay(100);
+    delay(250);
+  }
+}
+
+int wrap(int n, int M) {
+  int result = n;
+  while (result < 0) {
+    result += M;
+  }
+  while (result >= M) {
+    result -= M;
+  }
+  return(result);
+}
+
+void infinity_tail(){
+  int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
+  0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
+  for (int i=0 ; i<32 ; ++i) { 
+    all_off();
+    pixels.setPixelColor(sequence[i],pixels.Color(255,0,0));
+    for (int j=1 ; j<5 ; ++j) {
+      pixels.setPixelColor(sequence[wrap(i-j,32)], pixels.Color(85,0,0));
+    }
+    pixels.show();
+    delay(10);
+  }
+}
+
+int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
+  0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
+
+void snake(int head, int tail_length, uint32_t color_head, uint32_t color_tail) {
+  pixels.setPixelColor(sequence[head],color_head);
+    for (int j=1 ; j<tail_length+1 ; ++j) {
+      pixels.setPixelColor(sequence[wrap(head-j,32)], color_tail);
+    }
+}
+void infinity_tails(){
+
+  for (int i=0 ; i<32 ; ++i) { 
+    int j=wrap(i-8,32);
+    all_off();
+    snake(i,3, pixels.Color(255,0,0), pixels.Color(85,0,0));
+    snake(j,2, pixels.Color(0,255,0), pixels.Color(0,85,0));
+    pixels.show();
+    delay(50);
   }
 }
 
 void identify_0_16() {
   pixels.setPixelColor(0,red);
   pixels.setPixelColor(1,green);
-  pixels.setPixelColor(16,red);
+  pixels.setPixelColor(16,blue);
   pixels.setPixelColor(17,green);
   pixels.show();
 }
@@ -110,8 +158,10 @@ void loop() {
 //  left_CCW();
 //  left_right_CCW();
 //  left_right_sync_CCW();
-//    infinity ();
-  identify_0_16();
+//  infinity ();
+//  infinity_tail();
+  infinity_tails();
+//identify_0_16();
 }
 
   
