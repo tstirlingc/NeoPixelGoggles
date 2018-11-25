@@ -89,9 +89,11 @@ void left_right_sync_CCW(){
   }
 }
 
-void infinity(){
-  int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
+int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
   0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
+
+
+void infinity() {
   for (int i=0 ; i<32 ; ++i) { 
     all_off();
     pixels.setPixelColor(sequence[i],red);
@@ -99,6 +101,28 @@ void infinity(){
     delay(250);
   }
 }
+
+// HOMEWORK #1:  get programs running on own computer with goggles
+
+// HOMEWORK #2:  Research how to generate random numbers between 0 and 255 and put into this program
+void infinity_random_colors(){
+  for (int i=0 ; i<32 ; ++i) { 
+    all_off();
+    int r = 50; // random number between 0 and 255
+    int g = 50;
+    int b = 50;
+    uint32_t color = pixels.Color(r,g,b);
+    pixels.setPixelColor(sequence[i],color);
+    pixels.show();
+    delay(250);
+  }
+}
+
+// HOMEWORK #3:  Write a pattern #3 using the random number generator to select a random pixel (0-32) in
+// addition to a random color, and consider a random delay.  You won't need a for loop or the all_off function.
+
+
+
 
 int wrap(int n, int M) {
   int result = n;
@@ -112,8 +136,6 @@ int wrap(int n, int M) {
 }
 
 void infinity_tail(){
-  int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
-  0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
   for (int i=0 ; i<32 ; ++i) { 
     all_off();
     pixels.setPixelColor(sequence[i],pixels.Color(255,0,0));
@@ -125,8 +147,6 @@ void infinity_tail(){
   }
 }
 
-int sequence[32] = {27, 28, 29, 30, 31, 16, 17, 18, 7, 6, 5, 4, 3, 2, 1,
-  0, 15, 14, 13, 12, 11, 10, 9, 8, 19, 20, 21, 22, 23, 24, 25, 26};
 
 void snake(int head, int tail_length, uint32_t color_head, uint32_t color_tail) {
   pixels.setPixelColor(sequence[head],color_head);
@@ -160,8 +180,9 @@ void loop() {
 //  left_right_sync_CCW();
 //  infinity ();
 //  infinity_tail();
-  infinity_tails();
+//  infinity_tails();
 //identify_0_16();
+    infinity_random_colors();
 }
 
   
