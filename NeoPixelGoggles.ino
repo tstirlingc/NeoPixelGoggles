@@ -18,6 +18,7 @@ uint32_t prevTime;
 uint32_t red = pixels.Color(85,0,0);
 uint32_t green = pixels.Color(0,85,0);
 uint32_t blue = pixels.Color(0,0,85);
+int cycle_time = 3000; // change every 3 seconds
 
 void setup() {
 #ifdef __AVR_ATtiny85__ // Trinket, Gemma, etc.
@@ -26,6 +27,7 @@ void setup() {
   pixels.begin();
   pixels.setBrightness(85); // 1/3 brightness
   prevTime = millis();
+  randomSeed(analogRead(1));
 }
 
 void all_off() {
@@ -78,14 +80,17 @@ int fix_left_range(int n) {
 }
 
 void left_right_sync_CCW(){
-  for ( int i=0 ; i<16 ; ++i) {
-    int j= fix_left_range(i+16+3); 
-    all_off();
-    
-    pixels.setPixelColor(i,red); 
-    pixels.setPixelColor(j,red);
-    pixels.show();
-    delay(250);    
+  uint32_t start_time = millis();
+  while (millis() < start_time + cycle_time) {
+    for ( int i=0 ; i<16 ; ++i) {
+      int j= fix_left_range(i+16+3); 
+      all_off();
+      
+      pixels.setPixelColor(i,red); 
+      pixels.setPixelColor(j,red);
+      pixels.show();
+      delay(250);    
+    }
   }
 }
 
@@ -103,24 +108,91 @@ void infinity() {
 }
 
 // HOMEWORK #1:  get programs running on own computer with goggles
-
-// HOMEWORK #2:  Research how to generate random numbers between 0 and 255 and put into this program
-void infinity_random_colors(){
-  for (int i=0 ; i<32 ; ++i) { 
+void set_4_random_pixels_same_color_and_delay(int intensity) {
     all_off();
-    int r = 50; // random number between 0 and 255
-    int g = 50;
-    int b = 50;
+    int r = random (intensity); // random number between 0 and 255
+    int g = random (intensity);
+    int b = random (intensity);
     uint32_t color = pixels.Color(r,g,b);
-    pixels.setPixelColor(sequence[i],color);
+    int num_pix = random(1,10);
+    for (int i=0 ; i<num_pix ; ++i) {
+      pixels.setPixelColor(random (32),color);
+    }
     pixels.show();
-    delay(250);
-  }
+    delay (random (100,250));
 }
 
 // HOMEWORK #3:  Write a pattern #3 using the random number generator to select a random pixel (0-32) in
 // addition to a random color, and consider a random delay.  You won't need a for loop or the all_off function.
+void set_4_random_pixels_different_colors_and_delay(int intensity) {
+     all_off();
+    int num_pix = random(1,10);
+    for (int i=0 ; i<num_pix ; ++i) {
+      int r = random (intensity); // random number between 0 and 255
+      int g = random (intensity);
+      int b = random (intensity);
+      uint32_t color = pixels.Color(r,g,b);
+      pixels.setPixelColor(random (32),color);
+    }
+    pixels.show();
+    delay (random (100,250));
+}
 
+// HOMEWORK #2:  Research how to generate random numbers between 0 and 255 and put into this program
+void infinity_random_colors(){
+  uint32_t start_time = millis();
+    while (millis() < start_time + cycle_time) {
+    for (int intensity=5 ; intensity<256 ; intensity += 10) {
+      set_4_random_pixels_same_color_and_delay(intensity);
+    }
+    for (int intensity=255 ; intensity>5 ; intensity -= 10) {
+      set_4_random_pixels_same_color_and_delay(intensity);
+    }
+  }
+}
+
+void infinity_random_colors2(){
+  uint32_t start_time = millis();
+  while (millis() < start_time + cycle_time) {
+    for (int intensity=5 ; intensity<256 ; intensity += 10) {
+      set_4_random_pixels_different_colors_and_delay(intensity);
+    }
+    for (int intensity=255 ; intensity>5 ; intensity -= 10) {
+      set_4_random_pixels_different_colors_and_delay(intensity);
+    }
+  }
+}
+
+void update_random_pixel(int intensity, int & led_pixel, int & led_delay, uint32_t & led_time) {
+   if (millis() > led_time) {
+      pixels.setPixelColor(led_pixel, 0);
+      led_pixel = random(0,32);
+      uint32_t color = pixels.Color(random(intensity),random(intensity),random(intensity));
+      pixels.setPixelColor(led_pixel, color);
+      pixels.show();
+      led_delay = random(50,500);
+      led_time = millis() + led_delay;
+   }
+}
+
+#define NUM_PROC 8
+void processing() {
+  all_off();
+  int intensity = 100;
+  uint32_t start_time = millis();
+  int led_pixel[NUM_PROC];
+  int led_delay[NUM_PROC];
+  uint32_t led_time[NUM_PROC];
+  for (int i=0 ; i<NUM_PROC ; ++i) {
+    led_time[i] = millis();
+    led_pixel[i] = 0;
+  }
+  while (millis() < start_time + cycle_time) {
+    for (int i=0 ; i<NUM_PROC ; ++i) {
+      update_random_pixel(random(5,256), led_pixel[i], led_delay[i], led_time[i]);
+    }
+  }
+}
 
 
 
@@ -136,14 +208,17 @@ int wrap(int n, int M) {
 }
 
 void infinity_tail(){
-  for (int i=0 ; i<32 ; ++i) { 
-    all_off();
-    pixels.setPixelColor(sequence[i],pixels.Color(255,0,0));
-    for (int j=1 ; j<5 ; ++j) {
-      pixels.setPixelColor(sequence[wrap(i-j,32)], pixels.Color(85,0,0));
+  uint32_t start_time = millis();
+  while (millis() < start_time + cycle_time) {
+    for (int i=0 ; i<32 ; ++i) { 
+      all_off();
+      pixels.setPixelColor(sequence[i],pixels.Color(255,0,0));
+      for (int j=1 ; j<5 ; ++j) {
+        pixels.setPixelColor(sequence[wrap(i-j,32)], pixels.Color(85,0,0));
+      }
+      pixels.show();
+      delay(10);
     }
-    pixels.show();
-    delay(10);
   }
 }
 
@@ -155,14 +230,16 @@ void snake(int head, int tail_length, uint32_t color_head, uint32_t color_tail) 
     }
 }
 void infinity_tails(){
-
-  for (int i=0 ; i<32 ; ++i) { 
-    int j=wrap(i-8,32);
-    all_off();
-    snake(i,3, pixels.Color(255,0,0), pixels.Color(85,0,0));
-    snake(j,2, pixels.Color(0,255,0), pixels.Color(0,85,0));
-    pixels.show();
-    delay(50);
+  uint32_t start_time = millis();
+  while (millis() < start_time+cycle_time) {
+    for (int i=0 ; i<32 ; ++i) { 
+      int j=wrap(i-8,32);
+      all_off();
+      snake(i,3, pixels.Color(255,0,0), pixels.Color(85,0,0));
+      snake(j,2, pixels.Color(0,255,0), pixels.Color(0,85,0));
+      pixels.show();
+      delay(50);
+    }
   }
 }
 
@@ -182,7 +259,13 @@ void loop() {
 //  infinity_tail();
 //  infinity_tails();
 //identify_0_16();
+
+    infinity_tails();
     infinity_random_colors();
+    left_right_sync_CCW();
+    processing();
+    infinity_tail();
+    infinity_random_colors2();
 }
 
   
